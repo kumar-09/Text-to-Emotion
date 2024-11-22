@@ -6,6 +6,37 @@ import numpy as np
 from datetime import datetime
 import joblib
 from track_utils import create_page_visited_table, add_page_visited_details, view_all_page_visited_details, add_prediction_details, view_all_prediction_details, create_emotionclf_table, IST  # Import IST from track_utils
+from googletrans import Translator
+from deep_translator import GoogleTranslator
+
+# Load Model and Vectorizer
+pipe_lr2 = joblib.load(open("./models/emotion_classifier_pipe_lr2.pkl", "rb"))
+vectorizer = joblib.load(open("./models/vectorizer.pkl", "rb"))
+
+# Function to translate text to English
+# def translate_to_english(text):
+#     translator = Translator()
+#     translated_text = translator.translate(text, dest='en').text
+#     return translated_text
+def translate_to_english(text):
+    translator = GoogleTranslator(source='auto', target='en')
+    translated_text = translator.translate(text)
+    return translated_text
+
+
+# Function to predict emotions
+def predict_emotions2(docx):
+    translated_text = translate_to_english(docx)
+    # text_vec = vectorizer.transform([translated_text])
+    results = pipe_lr.predict([translated_text])
+    return results[0]
+
+# Function to get prediction probabilities
+def get_prediction_proba2(docx):
+    translated_text = translate_to_english(docx)
+    # text_vec = vectorizer.transform([translated_text])
+    results = pipe_lr.predict_proba([translated_text])
+    return results
 
 # Load Model
 pipe_lr = joblib.load(open("./models/emotion_classifier_pipe_lr.pkl", "rb"))
@@ -39,8 +70,8 @@ def main():
         if submit_text:
             col1, col2 = st.columns(2)
 
-            prediction = predict_emotions(raw_text)
-            probability = get_prediction_proba(raw_text)
+            prediction = predict_emotions2(raw_text)
+            probability = get_prediction_proba2(raw_text)
 
             add_prediction_details(raw_text, prediction, np.max(probability), datetime.now(IST))
 
